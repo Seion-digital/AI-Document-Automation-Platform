@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext, useMemo, useCallback } from 'react';
 import { FileUp, FileDown, Search, Bell, Settings, User, LogOut, ChevronDown, ChevronRight, CheckCircle, XCircle, AlertTriangle, FileText, PlusCircle, Trash2, Edit, SlidersHorizontal, Bot, Sparkles, BarChart2, FolderKanban, FileClock, ShieldCheck } from 'lucide-react';
 
 // Mock Data
@@ -39,6 +39,22 @@ const mockComplianceIssues = [
 // App Context for state management
 const AppContext = createContext();
 
+const AppProvider = ({ children, page, navigate, user, isLoading, setIsLoading }) => {
+  const contextValue = useMemo(() => ({
+    page,
+    navigate,
+    user,
+    isLoading,
+    setIsLoading,
+  }), [page, navigate, user, isLoading, setIsLoading]);
+
+  return (
+    <AppContext.Provider value={contextValue}>
+      {children}
+    </AppContext.Provider>
+  );
+};
+
 // Main App Component
 export default function App() {
   const [page, setPage] = useState('dashboard'); // 'dashboard', 'review', 'draft', 'templates', 'reports', 'settings'
@@ -46,20 +62,20 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navigate = (pageName) => {
+  const navigate = useCallback((pageName) => {
     setPage(pageName);
     setIsMobileMenuOpen(false);
     window.scrollTo(0, 0);
-  };
-
-  const AppProvider = ({ children }) => (
-    <AppContext.Provider value={{ page, navigate, user, isLoading, setIsLoading }}>
-      {children}
-    </AppContext.Provider>
-  );
+  }, []);
 
   return (
-    <AppProvider>
+    <AppProvider
+      page={page}
+      navigate={navigate}
+      user={user}
+      isLoading={isLoading}
+      setIsLoading={setIsLoading}
+    >
       <div className="bg-gray-50 font-sans text-gray-800 min-h-screen flex">
         <Sidebar isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
         <div className="flex-1 flex flex-col lg:ml-64">
